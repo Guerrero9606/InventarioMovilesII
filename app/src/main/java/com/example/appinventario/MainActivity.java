@@ -1,39 +1,66 @@
 package com.example.appinventario;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnCrearDB;
+    private Button btnCrearArticulo;
+    private EditText etCodigo, etDescripcion, etPrecio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnCrearDB = findViewById(R.id.btnCrearDB);
+        etCodigo = findViewById(R.id.etCodigo);
+        etDescripcion = findViewById(R.id.etDescripcion);
+        etPrecio = findViewById(R.id.etPrecio);
+        btnCrearArticulo = findViewById(R.id.btnCrearArticulo);
 
-        btnCrearDB.setOnClickListener(new View.OnClickListener() {
+        btnCrearArticulo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(MainActivity.this, "tienda.db", null, 1);
-
-                admin.getWritableDatabase();
-
-                Toast.makeText(MainActivity.this, "Base de datos creada correctamente", Toast.LENGTH_SHORT).show();
-
-                btnCrearDB.setText("CONECTADA");
-                btnCrearDB.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.colorAcentos));
-                //getResources().getColor(), ya no se usa en versiones recientes de Android (API nuevas)
-                //La manera moderna es: ContextCompat.getColor(this, R.color.colorAcentos)
+                registrarProducto();
             }
         });
+    }
+
+    private void registrarProducto(){
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+
+        if (!codigo.isEmpty() || !descripcion.isEmpty() || !precio.isEmpty()){
+
+            AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
+            SQLiteDatabase db = admin.getWritableDatabase(); //.getReadableDatabase() Abre la base de datos en solo lectura, getWritableDatabase() abre la base de datos en lectura y escritura.
+
+            ContentValues registro = new ContentValues();
+            registro.put("codigo", codigo);
+            registro.put("descripcion", descripcion);
+            registro.put("precio", precio);
+
+            db.insert("articulos", null, registro);
+
+            //Cerrar conexion a la base de datos por seguridad y por consumo de recursos.
+            db.close();
+
+            etCodigo.setText("");
+            etDescripcion.setText("");
+            etPrecio.setText("");
+
+            Toast.makeText(this, "Articulo registrado correctamente en base de datos", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Todos los campos deben estar diligenciados", Toast.LENGTH_SHORT).show();
+        }
     }
 }
