@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnCrearArticulo;
+    private Button btnCrearArticulo, btnBuscar;
     private EditText etCodigo, etDescripcion, etPrecio;
 
     @Override
@@ -25,11 +25,19 @@ public class MainActivity extends AppCompatActivity {
         etDescripcion = findViewById(R.id.etDescripcion);
         etPrecio = findViewById(R.id.etPrecio);
         btnCrearArticulo = findViewById(R.id.btnCrearArticulo);
+        btnBuscar = findViewById(R.id.btnBuscar);
 
         btnCrearArticulo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 registrarProducto();
+            }
+        });
+
+        btnBuscar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buscarProducto();
             }
         });
     }
@@ -61,6 +69,34 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Articulo registrado correctamente en base de datos", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Todos los campos deben estar diligenciados", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void buscarProducto(){
+        String codigo = etCodigo.getText().toString();
+
+        if (!codigo.isEmpty()){
+            AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
+            SQLiteDatabase db = admin.getReadableDatabase();
+
+            android.database.Cursor fila = db.rawQuery("SELECT descripcion, precio FROM articulos WHERE codigo = " + codigo, null);
+
+            if (fila.moveToFirst()){
+                etDescripcion.setText(fila.getString(0));
+                etPrecio.setText(fila.getString(1));
+                Toast.makeText(this, "Producto encontrado", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "El producto no existe", Toast.LENGTH_SHORT).show();
+                etCodigo.setText("");
+                etDescripcion.setText("");
+                etPrecio.setText("");
+            }
+
+            db.close();
+            fila.close();
+
+        } else {
+            Toast.makeText(this, "Ingrese el codigo del producto a buscar", Toast.LENGTH_SHORT).show();
         }
     }
 }
