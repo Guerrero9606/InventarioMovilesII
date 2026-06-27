@@ -72,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) { borrarProducto(); }
         });
+
+        cargarListaProductos();
+
+        if (adaptador != null){
+            adaptador.notifyDataSetChanged();
+        }
     }
 
     private void registrarProducto(){
