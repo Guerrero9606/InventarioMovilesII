@@ -101,4 +101,19 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnBuscarTodos"
+        android:layout_width="329dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Ver todos los productos"
+        app:backgroundTint="@color/colorAcentos"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProductos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>
