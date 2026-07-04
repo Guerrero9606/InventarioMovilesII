@@ -74,10 +74,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         cargarListaProductos();
-
-        if (adaptador != null){
-            adaptador.notifyDataSetChanged();
-        }
     }
 
     private void registrarProducto(){
@@ -99,6 +95,12 @@ public class MainActivity extends AppCompatActivity {
 
             //Cerrar conexion a la base de datos por seguridad y por consumo de recursos.
             db.close();
+
+            cargarListaProductos();
+
+            if (adaptador != null){
+                adaptador.notifyDataSetChanged();
+            }
 
             etCodigo.setText("");
             etDescripcion.setText("");
