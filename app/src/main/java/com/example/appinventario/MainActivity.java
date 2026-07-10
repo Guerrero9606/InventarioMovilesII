@@ -37,17 +37,17 @@ public class MainActivity extends AppCompatActivity {
         btnBuscar = findViewById(R.id.btnBuscar);
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
-        btnBuscarTodos = findViewById(R.id.btnBuscarTodos);
+        //btnBuscarTodos = findViewById(R.id.btnBuscarTodos);
         rvProductos = findViewById(R.id.rvProductos);
 
         rvProductos.setLayoutManager(new LinearLayoutManager(this));
 
-        btnBuscarTodos.setOnClickListener(new View.OnClickListener() {
+        /*btnBuscarTodos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cargarListaProductos();
             }
-        });
+        });*/
 
         btnCrearArticulo.setOnClickListener(new View.OnClickListener() {
             @Override
