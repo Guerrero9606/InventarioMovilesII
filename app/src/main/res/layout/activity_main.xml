@@ -80,6 +80,22 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/swOferta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="¿Producto en oferta?"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <ProgressBar
+                android:id="@+id/pbCarga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCrearArticulo"
                 android:layout_width="match_parent"

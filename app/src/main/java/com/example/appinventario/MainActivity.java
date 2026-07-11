@@ -3,9 +3,6 @@ package com.example.appinventario;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,8 +10,14 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvProductos;
     private AdaptadorProducto adaptador;
     private List<Producto> listaProductos;
+    private FirebaseFirestore db;
+    private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
+    private android.widget.ProgressBar pbCarga;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         //btnBuscarTodos = findViewById(R.id.btnBuscarTodos);
         rvProductos = findViewById(R.id.rvProductos);
 
+        swOferta = findViewById(R.id.swOferta);
+        pbCarga = findViewById(R.id.pbCarga);
+
+        db = FirebaseFirestore.getInstance();
+
         rvProductos.setLayoutManager(new LinearLayoutManager(this));
 
         /*btnBuscarTodos.setOnClickListener(new View.OnClickListener() {
@@ -52,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         btnCrearArticulo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                registrarProducto();
+                registrarProductoFirebase();
             }
         });
 
@@ -215,5 +226,46 @@ public class MainActivity extends AppCompatActivity {
         adaptador = new AdaptadorProducto(listaProductos);
 
         rvProductos.setAdapter(adaptador);
+    }
+
+    private void registrarProductoFirebase(){
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+
+        boolean estaEnOferta = swOferta.isChecked();
+
+        if (!codigo.isEmpty() && !descripcion.isEmpty() && !precio.isEmpty()){
+
+            pbCarga.setVisibility(View.VISIBLE);
+            btnCrearArticulo.setEnabled(false);
+
+            Map<String, Object> productoMap = new HashMap<>();
+            productoMap.put("codigo", Integer.parseInt(codigo));
+            productoMap.put("descripcion", descripcion);
+            productoMap.put("precio", Double.parseDouble(precio));
+            productoMap.put("oferta", estaEnOferta);
+
+            db.collection("productos").document(codigo)
+                .set(productoMap)
+                .addOnSuccessListener(aVoid -> {
+                    pbCarga.setVisibility(View.GONE);
+                    btnCrearArticulo.setEnabled(true);
+
+                    Toast.makeText(MainActivity.this, "Guardado en Firebase con exito", Toast.LENGTH_SHORT).show();
+                    etCodigo.setText("");
+                    etDescripcion.setText("");
+                    etPrecio.setText("");
+                    swOferta.setChecked(false);
+                })
+                .addOnFailureListener(e -> {
+                    pbCarga.setVisibility(View.GONE);
+                    btnCrearArticulo.setEnabled(true);
+                    Toast.makeText(MainActivity.this, "Error al guardar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        } else {
+            Toast.makeText(MainActivity.this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show();
+        }
     }
 }
