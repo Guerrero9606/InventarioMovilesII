@@ -115,12 +115,26 @@
         android:layout_marginBottom="16dp">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFiltrar"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:text="FILTRAR"
+            android:textColor="@color/white"
+            app:backgroundTint="#85DB88"
+            app:strokeColor="#3E7942" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBuscar"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
+            android:textSize="12sp"
             android:text="BUSCAR"
             android:textColor="@color/white"
             app:backgroundTint="#4CAF50"
@@ -133,6 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
+            android:textSize="12sp"
             android:text="EDITAR"
             android:textColor="@color/white"
             app:backgroundTint="#FF9800"
@@ -145,6 +160,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
+            android:textSize="12sp"
             android:text="BORRAR"
             android:textColor="@color/white"
             app:backgroundTint="#F44336"

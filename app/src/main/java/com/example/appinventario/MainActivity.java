@@ -18,10 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos;
+    private Button btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar;
     private EditText etCodigo, etDescripcion, etPrecio;
 
     private RecyclerView rvProductos;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
         //btnBuscarTodos = findViewById(R.id.btnBuscarTodos);
+        btnFiltrar = findViewById(R.id.btnFiltrar);
         rvProductos = findViewById(R.id.rvProductos);
 
         swOferta = findViewById(R.id.swOferta);
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         btnBuscar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buscarProducto();
+                buscarProductoFirebase();
             }
         });
 
@@ -84,7 +86,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) { borrarProducto(); }
         });
 
-        cargarListaProductos();
+        btnFiltrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { filtrarSoloOfertas(); }
+        });
+
+        cargarProductosFirebaseTiempoReal();
     }
 
     private void registrarProducto(){
@@ -205,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cargarListaProductos(){
-        listaProductos = new ArrayList<>();
+        /*listaProductos = new ArrayList<>();
 
         AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
         SQLiteDatabase db = admin.getReadableDatabase();
@@ -225,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
 
         adaptador = new AdaptadorProducto(listaProductos);
 
-        rvProductos.setAdapter(adaptador);
+        rvProductos.setAdapter(adaptador);*/
     }
 
     private void registrarProductoFirebase(){
@@ -267,5 +274,103 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(MainActivity.this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void cargarProductosFirebase(){
+        listaProductos = new ArrayList<>();
+
+        db.collection("productos").get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()){
+                    listaProductos.clear();
+
+                    for (QueryDocumentSnapshot document : task.getResult()){
+                        Producto producto = document.toObject(Producto.class);
+                        listaProductos.add(producto);
+                    }
+
+                    adaptador = new AdaptadorProducto(listaProductos);
+                    rvProductos.setAdapter(adaptador);
+                } else {
+                    Toast.makeText(this, "Error al cargar los datos", Toast.LENGTH_SHORT).show();
+                }
+            });
+    }
+
+    private void cargarProductosFirebaseTiempoReal(){
+        listaProductos = new ArrayList<>();
+        adaptador = new AdaptadorProducto(listaProductos);
+        rvProductos.setAdapter(adaptador);
+
+        db.collection("productos")
+            .addSnapshotListener((value, error) -> {
+                if (error != null){
+                    Toast.makeText(this, "Fallo al escuchar los cambios", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (value != null) {
+                    listaProductos.clear();
+
+                    for (QueryDocumentSnapshot documento : value){
+                        Producto producto = documento.toObject(Producto.class);
+                        listaProductos.add(producto);
+                    }
+
+                    adaptador.notifyDataSetChanged();
+                }
+            });
+    }
+
+    private void filtrarSoloOfertas(){
+        db.collection("productos")
+            .whereEqualTo("oferta", true)
+            .addSnapshotListener((value, error) -> {
+                if (error != null){
+                    return;
+                }
+
+                if (value != null){
+                    listaProductos.clear();
+                    for (QueryDocumentSnapshot doc : value){
+                        listaProductos.add(doc.toObject(Producto.class));
+                    }
+                    adaptador.notifyDataSetChanged();
+                }
+            });
+    }
+
+    private void buscarProductoFirebase(){
+        String codigo = etCodigo.getText().toString();
+
+        if (codigo.isEmpty()){
+            Toast.makeText(this, "Ingrese el codigo a buscar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("productos").document(codigo).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()){
+                    String descripcion = documentSnapshot.getString("descripcion");
+                    Double precio = documentSnapshot.getDouble("precio");
+                    Boolean oferta = documentSnapshot.getBoolean("oferta");
+
+                    etDescripcion.setText(descripcion);
+                    etPrecio.setText(String.valueOf(precio));
+
+                    if (oferta != null){
+                        swOferta.setChecked(oferta);
+                    } else {
+                        swOferta.setChecked(false);
+                    }
+
+                    Toast.makeText(this, "Producto encontrado", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "El producto no existe", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .addOnFailureListener(e -> {
+               Toast.makeText(this, "Error de conexion", Toast.LENGTH_SHORT).show();
+            });
     }
 }
