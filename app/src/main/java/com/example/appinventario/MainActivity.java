@@ -24,11 +24,12 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar;
     private EditText etCodigo, etDescripcion, etPrecio;
-
+    private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
     private RecyclerView rvProductos;
     private AdaptadorProducto adaptador;
     private List<Producto> listaProductos;
     private FirebaseFirestore db;
+    private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
     private android.widget.ProgressBar pbCarga;
 
@@ -48,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
         btnFiltrar = findViewById(R.id.btnFiltrar);
         rvProductos = findViewById(R.id.rvProductos);
 
+        tilCodigo = findViewById(R.id.tilCodigo);
+        tilDescripcion = findViewById(R.id.tilDescripcion);
+        tilPrecio = findViewById(R.id.tilPrecio);
+
         swOferta = findViewById(R.id.swOferta);
         pbCarga = findViewById(R.id.pbCarga);
 
@@ -62,9 +67,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
-        btnCrearArticulo.setOnClickListener(new View.OnClickListener() {
+        etPrecio.addTextChangedListener(new android.text.TextWatcher(){
             @Override
-            public void onClick(View v) {
+            public void beforeTextChanged(CharSequence sequence, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence sequence, int start, int before, int count){
+                if (sequence.toString().isEmpty()){
+                    tilPrecio.setError("El precio no puede estar vacio");
+                } else if (Double.parseDouble(sequence.toString()) <= 0){
+                    tilPrecio.setError("El precio debe ser mayor a cero");
+                } else {
+                    tilPrecio.setErrorEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable sequence) {}
+        });
+
+        btnCrearArticulo.setOnClickListener(v -> {
+            if (esFormularioValido()) {
                 registrarProductoFirebase();
             }
         });
@@ -78,12 +101,12 @@ public class MainActivity extends AppCompatActivity {
 
         btnEditar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { editarProducto(); }
+            public void onClick(View v) { actualizarProductoFirebase(); }
         });
 
         btnBorrar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { borrarProducto(); }
+            public void onClick(View v) { eliminarProductoFirebase(); }
         });
 
         btnFiltrar.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +117,29 @@ public class MainActivity extends AppCompatActivity {
         cargarProductosFirebaseTiempoReal();
     }
 
+    private boolean esFormularioValido(){
+        boolean esValido = true;
+
+        String codigo = etCodigo.getText().toString();
+        String desc = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+
+        if (codigo.isEmpty() || codigo.length() < 3) {
+            tilCodigo.setError("El codigo debe tener al menos 3 digitos");
+            esValido = false;
+        } else {
+            tilCodigo.setErrorEnabled(false);
+        }
+
+        if (desc.isEmpty() || desc.length() < 10) {
+            tilDescripcion.setError("Sea mas descriptivo con el producto (min. 10 caracteres)");
+            esValido = false;
+        } else {
+            tilDescripcion.setErrorEnabled(false);
+        }
+
+        return esValido;
+    }
     private void registrarProducto(){
         String codigo = etCodigo.getText().toString();
         String descripcion = etDescripcion.getText().toString();
@@ -124,9 +170,9 @@ public class MainActivity extends AppCompatActivity {
             etDescripcion.setText("");
             etPrecio.setText("");
 
-            Toast.makeText(this, "Articulo registrado correctamente en base de datos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Articulo registrado correctamente en base de datos", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Todos los campos deben estar diligenciados", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Todos los campos deben estar diligenciados", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -177,12 +223,12 @@ public class MainActivity extends AppCompatActivity {
             db.close();
 
             if (cantidadActualizadas == 1){
-                Toast.makeText(this, "Producto actualizado correctamente", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Producto actualizado correctamente", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "No se encontro el producto", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "No se encontro el producto", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -202,12 +248,12 @@ public class MainActivity extends AppCompatActivity {
             etPrecio.setText("");
 
             if (cantidadBorrados == 1){
-                Toast.makeText(this, "Producto eliminado correctamente", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Producto eliminado correctamente", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Producto no encontrado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Producto no encontrado", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Ingrese el codigo del producto a eliminar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Ingrese el codigo del producto a eliminar", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -292,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                     adaptador = new AdaptadorProducto(listaProductos);
                     rvProductos.setAdapter(adaptador);
                 } else {
-                    Toast.makeText(this, "Error al cargar los datos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Error al cargar los datos", Toast.LENGTH_SHORT).show();
                 }
             });
     }
@@ -302,10 +348,10 @@ public class MainActivity extends AppCompatActivity {
         adaptador = new AdaptadorProducto(listaProductos);
         rvProductos.setAdapter(adaptador);
 
-        db.collection("productos")
+        listenerFirestore = db.collection("productos")
             .addSnapshotListener((value, error) -> {
                 if (error != null){
-                    Toast.makeText(this, "Fallo al escuchar los cambios", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Fallo al escuchar los cambios", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -325,6 +371,7 @@ public class MainActivity extends AppCompatActivity {
     private void filtrarSoloOfertas(){
         db.collection("productos")
             .whereEqualTo("oferta", true)
+            .whereLessThan("precio", 1000000)
             .addSnapshotListener((value, error) -> {
                 if (error != null){
                     return;
@@ -344,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
         String codigo = etCodigo.getText().toString();
 
         if (codigo.isEmpty()){
-            Toast.makeText(this, "Ingrese el codigo a buscar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Ingrese el codigo a buscar", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -364,13 +411,70 @@ public class MainActivity extends AppCompatActivity {
                         swOferta.setChecked(false);
                     }
 
-                    Toast.makeText(this, "Producto encontrado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Producto encontrado", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "El producto no existe", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "El producto no existe", Toast.LENGTH_SHORT).show();
                 }
             })
             .addOnFailureListener(e -> {
-               Toast.makeText(this, "Error de conexion", Toast.LENGTH_SHORT).show();
+               Toast.makeText(MainActivity.this, "Error de conexion", Toast.LENGTH_SHORT).show();
             });
+    }
+
+    private void actualizarProductoFirebase(){
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+        boolean estaEnOferta = swOferta.isChecked();
+
+        if (!codigo.isEmpty() && !descripcion.isEmpty() && !precio.isEmpty()){
+            db.collection("productos").document(codigo)
+                .update(
+                    "descripcion", descripcion,
+                        "precio", Double.parseDouble(precio),
+                        "oferta", estaEnOferta
+                )
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(MainActivity.this, "Producto actualizado correctamente", Toast.LENGTH_SHORT).show();
+                    etCodigo.setText("");
+                    etDescripcion.setText("");
+                    etPrecio.setText("");
+                    swOferta.setChecked(false);
+                })
+                .addOnFailureListener(e -> {
+                   Toast.makeText(MainActivity.this, "Error al actualizar", Toast.LENGTH_SHORT).show();
+                });
+        } else {
+            Toast.makeText(MainActivity.this, "Llena todos los campos del formulario", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void eliminarProductoFirebase(){
+        String codigo = etCodigo.getText().toString();
+
+        if (codigo.isEmpty()){
+            Toast.makeText(MainActivity.this, "Ingrese el codigo del producto a eliminar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("productos").document(codigo).delete()
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(MainActivity.this, "Producto borrado", Toast.LENGTH_SHORT).show();
+                etCodigo.setText("");
+                etDescripcion.setText("");
+                etPrecio.setText("");
+                swOferta.setChecked(false);
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(MainActivity.this, "Error al borrar el producto", Toast.LENGTH_SHORT).show();
+            });
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        if (listenerFirestore != null) {
+            listenerFirestore.remove();
+        }
     }
 }
