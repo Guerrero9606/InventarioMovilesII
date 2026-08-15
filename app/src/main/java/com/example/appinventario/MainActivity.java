@@ -1,6 +1,7 @@
 package com.example.appinventario;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -19,10 +20,11 @@ import java.util.Map;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar;
+    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion;
     private EditText etCodigo, etDescripcion, etPrecio;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
     private RecyclerView rvProductos;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
     private android.widget.ProgressBar pbCarga;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         //btnBuscarTodos = findViewById(R.id.btnBuscarTodos);
         btnFiltrar = findViewById(R.id.btnFiltrar);
         rvProductos = findViewById(R.id.rvProductos);
+        btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         pbCarga = findViewById(R.id.pbCarga);
 
         db = FirebaseFirestore.getInstance();
+
+        mAuth = FirebaseAuth.getInstance();
 
         rvProductos.setLayoutManager(new LinearLayoutManager(this));
 
@@ -112,6 +118,13 @@ public class MainActivity extends AppCompatActivity {
         btnFiltrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { filtrarSoloOfertas(); }
+        });
+
+        btnCerrarSesion.setOnClickListener(v -> {
+            mAuth.signOut();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         cargarProductosFirebaseTiempoReal();

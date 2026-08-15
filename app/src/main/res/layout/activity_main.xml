@@ -166,7 +166,7 @@
             android:textSize="12sp"
             android:text="BORRAR"
             android:textColor="@color/white"
-            app:backgroundTint="#F44336"
+            app:backgroundTint="#D24137"
             app:strokeColor="#95231B" />
 
     </LinearLayout>
@@ -185,5 +185,18 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCerrarSesion"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:textSize="12sp"
+        android:text="CERRAR SESION"
+        android:textColor="@color/white"
+        app:backgroundTint="#FF0000"
+        app:strokeColor="#95231B"
+        app:cornerRadius="20dp"/>
 
 </LinearLayout>
