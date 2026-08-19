@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import android.content.SharedPreferences;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -15,6 +17,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private com.google.android.material.textfield.TextInputEditText etLoginCorreo, etLoginPassword;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         etLoginCorreo = findViewById(R.id.etLoginCorreo);
         etLoginPassword = findViewById(R.id.etLoginPassword);
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         if (mAuth.getCurrentUser() != null){
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -62,9 +66,27 @@ public class LoginActivity extends AppCompatActivity {
                     btnLogin.setText("INICIAR SESION");
 
                     if (task.isSuccessful()){
-                        Intent intencion = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intencion);
-                        finish();
+
+                        String uid = mAuth.getCurrentUser().getUid();
+
+                        db.collection("usuarios").document(uid).get()
+                            .addOnSuccessListener(documentSnapshot -> {
+                                if(documentSnapshot.exists()){
+                                    String nombreReal = documentSnapshot.getString("nombre");
+                                    String rol = documentSnapshot.getString("rol");
+
+                                    SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = prefs.edit();
+                                    editor.putString("nombre", nombreReal);
+                                    editor.putString("rol", rol);
+                                    editor.apply();
+
+                                    Intent intencion = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intencion);
+                                    finish();
+
+                                }
+                            });
                     } else {
                         Toast.makeText(LoginActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
                     }

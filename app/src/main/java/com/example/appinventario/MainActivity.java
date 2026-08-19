@@ -2,6 +2,7 @@ package com.example.appinventario;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -25,7 +26,8 @@ import com.google.firebase.auth.FirebaseAuth;
 public class MainActivity extends AppCompatActivity {
 
     private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion;
-    private EditText etCodigo, etDescripcion, etPrecio;
+    private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
+    private Button btnGuardarTienda;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
     private RecyclerView rvProductos;
     private AdaptadorProducto adaptador;
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         etCodigo = findViewById(R.id.etCodigo);
         etDescripcion = findViewById(R.id.etDescripcion);
         etPrecio = findViewById(R.id.etPrecio);
+        etNombreTienda = findViewById(R.id.etNombreTienda);
+
         btnCrearArticulo = findViewById(R.id.btnCrearArticulo);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnEditar = findViewById(R.id.btnEditar);
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         btnFiltrar = findViewById(R.id.btnFiltrar);
         rvProductos = findViewById(R.id.rvProductos);
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
+        btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -121,11 +126,42 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnCerrarSesion.setOnClickListener(v -> {
+
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear();
+            editor.apply();
+
             mAuth.signOut();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
+
+        btnGuardarTienda.setOnClickListener(v->{
+            String nombreTienda = etNombreTienda.getText().toString().trim();
+
+            if (!nombreTienda.isEmpty()){
+                SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferencias.edit();
+
+                editor.putString("nombre_tienda", nombreTienda);
+                editor.apply();
+
+                Toast.makeText(MainActivity.this, "Nombre guardado en memoria", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Ingrese el nombre de la tienda", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        String nombreCached = prefs.getString("nombre", "Usuario");
+        String rolCached = prefs.getString("rol", "Vendedor");
+
+        SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+        String tiendaGuardada = preferencias.getString("nombre_tienda", "Mi Inventario");
+
+        etNombreTienda.setText(tiendaGuardada);
 
         cargarProductosFirebaseTiempoReal();
     }
