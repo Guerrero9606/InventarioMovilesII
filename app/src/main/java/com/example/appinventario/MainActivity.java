@@ -3,6 +3,7 @@ package com.example.appinventario;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +71,13 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        rvProductos.setLayoutManager(new LinearLayoutManager(this));
+        int orientacionActual = getResources().getConfiguration().orientation;
+
+        if (orientacionActual == Configuration.ORIENTATION_LANDSCAPE){
+            rvProductos.setLayoutManager(new GridLayoutManager(this, 2));
+        } else {
+            rvProductos.setLayoutManager(new LinearLayoutManager(this));
+        }
 
         /*btnBuscarTodos.setOnClickListener(new View.OnClickListener() {
             @Override

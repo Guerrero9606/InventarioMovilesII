@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F5F5"
     >
 
     <LinearLayout
@@ -12,24 +11,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="32dp"
-        android:gravity="center">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_caja"
-            android:layout_marginBottom="24dp"
-            app:tint="@color/colorPrimario"
-            />
+        android:gravity="center"
+        android:background="#F5F5F5" >
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Bienvenido"
-            android:textSize="28sp"
+            android:text="Crear Cuenta Nueva"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:textColor="@color/colorTextoSecundario"
+            android:textColor="@color/colorAcentos"
             android:layout_marginBottom="32dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -38,8 +30,23 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etNombreRegistro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nombre Completo"
+            android:inputType="textEmailAddress"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etLoginCorreo"
+                android:id="@+id/etRegistroCorreo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="correo@cesde.edu.co"
@@ -52,10 +59,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:passwordToggleEnabled="true"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etLoginPassword"
+                android:id="@+id/etRegistroPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Contraseña"
@@ -63,21 +70,37 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogin"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="INICIAR SESION"
-            app:cornerRadius="10dp"
-            app:backgroundTint="@color/colorPrimario"/>
-
-        <TextView
-            android:id="@+id/tvIrRegistro"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="¿No tienes cuenta? Registrate aqui"
+            app:passwordToggleEnabled="true"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRegistroConfirmacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Confirmar Contraseña"
+                android:inputType="textPassword" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegistrarme"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="REGISTRARME"
+            app:cornerRadius="10dp"
+            app:backgroundTint="@color/colorAcentos"/>
+
+        <TextView
+            android:id="@+id/tvVolverLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="¿Ya tienes cuenta? Inicia sesion aqui"
             android:gravity="center"
-            android:textColor="@color/colorPrimario"
+            android:textColor="@color/colorAcentos"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
             android:padding="8dp" />
