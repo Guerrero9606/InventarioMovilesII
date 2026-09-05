@@ -25,9 +25,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.auth.FirebaseAuth;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity {
 
-    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion;
+    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI;
     private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
     private Button btnGuardarTienda;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
@@ -37,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
-    private android.widget.ProgressBar pbCarga;
+    private android.widget.ProgressBar pbCarga, pbCargaApi;
     private FirebaseAuth mAuth;
 
     @Override
@@ -48,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         etCodigo = findViewById(R.id.etCodigo);
         etDescripcion = findViewById(R.id.etDescripcion);
         etPrecio = findViewById(R.id.etPrecio);
-        etNombreTienda = findViewById(R.id.etNombreTienda);
+        //etNombreTienda = findViewById(R.id.etNombreTienda);
 
         btnCrearArticulo = findViewById(R.id.btnCrearArticulo);
         btnBuscar = findViewById(R.id.btnBuscar);
@@ -58,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
         btnFiltrar = findViewById(R.id.btnFiltrar);
         rvProductos = findViewById(R.id.rvProductos);
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
-        btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
+        //btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
+        btnAutocompletarAPI = findViewById(R.id.btnAutocompletarAPI);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -66,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         swOferta = findViewById(R.id.swOferta);
         pbCarga = findViewById(R.id.pbCarga);
+        pbCargaApi = findViewById(R.id.pbCargaApi);
 
         db = FirebaseFirestore.getInstance();
 
@@ -146,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
-        btnGuardarTienda.setOnClickListener(v->{
+        /*btnGuardarTienda.setOnClickListener(v-> {
             String nombreTienda = etNombreTienda.getText().toString().trim();
 
             if (!nombreTienda.isEmpty()){
@@ -160,6 +168,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(MainActivity.this, "Ingrese el nombre de la tienda", Toast.LENGTH_SHORT).show();
             }
+        });*/
+
+        btnAutocompletarAPI.setOnClickListener(v -> {
+            int idAleatorio = new java.util.Random().nextInt(20) + 1;
+            obtenerProductosAPI(idAleatorio);
         });
 
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
@@ -169,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
         String tiendaGuardada = preferencias.getString("nombre_tienda", "Mi Inventario");
 
-        etNombreTienda.setText(tiendaGuardada);
+        //etNombreTienda.setText(tiendaGuardada);
 
         cargarProductosFirebaseTiempoReal();
     }
@@ -533,5 +546,54 @@ public class MainActivity extends AppCompatActivity {
         if (listenerFirestore != null) {
             listenerFirestore.remove();
         }
+    }
+
+    private void obtenerProductosAPI(int productoId){
+
+        btnAutocompletarAPI.setEnabled(false);
+        pbCargaApi.setVisibility(View.VISIBLE);
+
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl("https://fakestoreapi.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+        ApiService api = retrofit.create(ApiService.class);
+
+        Call<ProductoAPI> llamada = api.obtenerProducto(productoId);
+
+        llamada.enqueue(new Callback<ProductoAPI>() {
+            @Override
+            public void onResponse(Call<ProductoAPI> call, Response<ProductoAPI> response) {
+
+                btnAutocompletarAPI.setEnabled(true);
+                pbCargaApi.setVisibility(View.GONE);
+
+                if (response.isSuccessful() && response.body() != null){
+                    ProductoAPI producto = response.body();
+
+                    etCodigo.setText(String.valueOf(productoId + 5000));
+                    etDescripcion.setText(producto.getTitle());
+
+                    double precioPesos = producto.getPrice() * 3200;
+
+                    etPrecio.setText(String.valueOf(precioPesos));
+
+                    String mensaje = "Sugerencia: " + producto.getTitle() + " - Precio: $" + producto.getPrice();
+                    Toast.makeText(MainActivity.this, mensaje, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Error al obtener el producto", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProductoAPI> call, Throwable t) {
+                btnAutocompletarAPI.setEnabled(true);
+                pbCargaApi.setVisibility(View.GONE);
+
+                Toast.makeText(MainActivity.this, "Error de conexion", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

@@ -21,23 +21,30 @@
             android:padding="8dp"
             >
 
-            <EditText
-                android:id="@+id/etNombreTienda"
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Nombre de tu tienda"
-                android:inputType="textCapWords"
+                android:text="Sugerencia de la API"
                 android:textSize="12sp"
-                android:background="@android:color/transparent"
-                android:padding="8dp"/>
+                android:textStyle="bold"
+                android:textColor="#E65100"
+                android:padding="8dp" />
 
-            <Button
-                android:id="@+id/btnGuardarTienda"
+            <ProgressBar
+                android:id="@+id/pbCargaApi"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="12dp"
+                android:visibility="gone"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAutocompletarAPI"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Guardar"
-                android:textSize="12sp"/>
+                android:text="RELLENAR"
+                android:textColor="#E65100"/>
 
         </LinearLayout>
 
