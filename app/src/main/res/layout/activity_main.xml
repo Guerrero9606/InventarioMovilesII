@@ -12,6 +12,14 @@
         android:background="@color/colorFondo"
         android:padding="16dp">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="MODO ADMIN"
+            app:cornerRadius="16dp"
+            />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

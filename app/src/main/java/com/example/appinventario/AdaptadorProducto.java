@@ -12,9 +12,11 @@ import java.util.List;
 public class AdaptadorProducto extends RecyclerView.Adapter<AdaptadorProducto.ProductoViewHolder> {
 
     private List<Producto> listaProductos;
+    private String rolUsuario;
 
-    public AdaptadorProducto(List<Producto> listaProductos){
+    public AdaptadorProducto(List<Producto> listaProductos, String rolUsuario){
         this.listaProductos = listaProductos;
+        this.rolUsuario = rolUsuario;
     }
 
     @NonNull
@@ -40,12 +42,23 @@ public class AdaptadorProducto extends RecyclerView.Adapter<AdaptadorProducto.Pr
             holder.tvEstado.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"));
         }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        if (rolUsuario.equals("Vendedor")){
+            holder.itemView.setClickable(false);
+            holder.itemView.setFocusable(false);
+        } else {
+            holder.itemView.setClickable(true);
+
+            holder.itemView.setOnClickListener(v -> {
+                Toast.makeText(v.getContext(), "Seccionaste: " + productoActual.getDescripcion(), Toast.LENGTH_SHORT ).show();
+            });
+        }
+
+        /*holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Seccionaste: " + productoActual.getDescripcion(), Toast.LENGTH_SHORT ).show();
             }
-        });
+        });*/
     }
 
     @Override

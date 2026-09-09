@@ -10,11 +10,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.graphics.drawable.ColorDrawable;
+import android.view.Window;
+import android.view.WindowManager;
+import android.graphics.Color;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,7 @@ import java.util.Map;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,10 +52,17 @@ public class MainActivity extends AppCompatActivity {
     private android.widget.ProgressBar pbCarga, pbCargaApi;
     private FirebaseAuth mAuth;
 
+    private String nombreCached, rolCached;
+    private MaterialToolbar toolbar;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         etCodigo = findViewById(R.id.etCodigo);
         etDescripcion = findViewById(R.id.etDescripcion);
@@ -176,14 +189,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
-        String nombreCached = prefs.getString("nombre", "Usuario");
-        String rolCached = prefs.getString("rol", "Vendedor");
+        nombreCached = prefs.getString("nombre", "Usuario");
+        rolCached = prefs.getString("rol", "Vendedor");
 
         SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
         String tiendaGuardada = preferencias.getString("nombre_tienda", "Mi Inventario");
 
         //etNombreTienda.setText(tiendaGuardada);
 
+        aplicarPermisosDeRol(rolCached);
+        
         cargarProductosFirebaseTiempoReal();
     }
 
@@ -405,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
                         listaProductos.add(producto);
                     }
 
-                    adaptador = new AdaptadorProducto(listaProductos);
+                    adaptador = new AdaptadorProducto(listaProductos, rolCached);
                     rvProductos.setAdapter(adaptador);
                 } else {
                     Toast.makeText(MainActivity.this, "Error al cargar los datos", Toast.LENGTH_SHORT).show();
@@ -415,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void cargarProductosFirebaseTiempoReal(){
         listaProductos = new ArrayList<>();
-        adaptador = new AdaptadorProducto(listaProductos);
+        adaptador = new AdaptadorProducto(listaProductos, rolCached);
         rvProductos.setAdapter(adaptador);
 
         listenerFirestore = db.collection("productos")
@@ -520,6 +535,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void eliminarProductoFirebase(){
+
+        if (!rolCached.equals("Administrador")){
+            Toast.makeText(MainActivity.this, "No tienes permisos para eliminar productos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String codigo = etCodigo.getText().toString();
 
         if (codigo.isEmpty()){
@@ -595,5 +616,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+    
+    private void aplicarPermisosDeRol(String rol){
+        if (rol.equals("Vendedor")){
+            btnBorrar.setVisibility(View.GONE);
+            btnEditar.setEnabled(false);
+            btnAutocompletarAPI.setVisibility(View.GONE);
+            toolbar.setVisibility(View.GONE);
+
+            if(getSupportActionBar() != null){
+                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimario)));
+            }
+            
+            Toast.makeText(MainActivity.this, "Rol: Vendedor, no se tienen permisos de edicion", Toast.LENGTH_SHORT).show();
+        } else if (rol.equals("Administrador")) {
+            btnBorrar.setVisibility(View.VISIBLE);
+            btnEditar.setEnabled(true);
+            btnAutocompletarAPI.setVisibility(View.VISIBLE);
+
+            if (getSupportActionBar() != null){
+                toolbar.setBackgroundColor(Color.RED);
+            }
+
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(android.graphics.Color.parseColor("#7F0000"));
+        }
     }
 }

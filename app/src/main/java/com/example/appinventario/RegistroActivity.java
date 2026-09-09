@@ -81,7 +81,7 @@ public class RegistroActivity extends AppCompatActivity {
                         Map<String, Object> perfilUsuario = new HashMap<>();
                         perfilUsuario.put("nombre", nombre);
                         perfilUsuario.put("correo", correo);
-                        perfilUsuario.put("rol", "Administrador");
+                        perfilUsuario.put("rol", "Vendedor");
 
                         db.collection("usuarios").document(uidUsuario).set(perfilUsuario)
                             .addOnSuccessListener(aVoid -> {
