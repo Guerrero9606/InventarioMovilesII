@@ -12,13 +12,36 @@
         android:background="@color/colorFondo"
         android:padding="16dp">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             app:title="MODO ADMIN"
             app:cornerRadius="16dp"
             />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAdminUsuarios"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:text="PANEL DE CONTROL DE USUARIOS"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:cornerRadius="10dp"
+            app:backgroundTint="#3F51B5"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

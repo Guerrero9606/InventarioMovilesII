@@ -39,7 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI;
+    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios;
     private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
     private Button btnGuardarTienda;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
         //btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
         btnAutocompletarAPI = findViewById(R.id.btnAutocompletarAPI);
+        btnAdminUsuarios = findViewById(R.id.btnAdminUsuarios);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -186,6 +187,10 @@ public class MainActivity extends AppCompatActivity {
         btnAutocompletarAPI.setOnClickListener(v -> {
             int idAleatorio = new java.util.Random().nextInt(20) + 1;
             obtenerProductosAPI(idAleatorio);
+        });
+
+        btnAdminUsuarios.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, GestionUsuariosActivity.class));
         });
 
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
@@ -624,6 +629,7 @@ public class MainActivity extends AppCompatActivity {
             btnEditar.setEnabled(false);
             btnAutocompletarAPI.setVisibility(View.GONE);
             toolbar.setVisibility(View.GONE);
+            btnAdminUsuarios.setVisibility(View.GONE);
 
             if(getSupportActionBar() != null){
                 getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimario)));
@@ -634,6 +640,7 @@ public class MainActivity extends AppCompatActivity {
             btnBorrar.setVisibility(View.VISIBLE);
             btnEditar.setEnabled(true);
             btnAutocompletarAPI.setVisibility(View.VISIBLE);
+            btnAdminUsuarios.setVisibility(View.VISIBLE);
 
             if (getSupportActionBar() != null){
                 toolbar.setBackgroundColor(Color.RED);
