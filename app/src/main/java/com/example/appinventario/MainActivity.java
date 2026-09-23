@@ -39,7 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios;
+    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios, btnAdjuntarImagen;
     private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
     private Button btnGuardarTienda;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         //btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
         btnAutocompletarAPI = findViewById(R.id.btnAutocompletarAPI);
         btnAdminUsuarios = findViewById(R.id.btnAdminUsuarios);
+        btnAdjuntarImagen = findViewById(R.id.btnAdjuntarImagen);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -125,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(android.text.Editable sequence) {}
+        });
+
+        btnAdjuntarImagen.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EvidenciaActivity.class);
+            startActivity(intent);
         });
 
         btnCrearArticulo.setOnClickListener(v -> {
