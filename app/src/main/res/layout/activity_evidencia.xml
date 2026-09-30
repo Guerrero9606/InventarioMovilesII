@@ -58,4 +58,56 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvConteoFotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 fotos seleccionadas"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:textColor="#757575"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSeleccionarMultiples"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="📁 SELECCIONAR VARIAS FOTOS"
+        app:cornerRadius="10dp"
+        android:layout_marginBottom="16dp" />
+
+    <ProgressBar
+        android:id="@+id/pbSubida"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvPorcentaje"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subiendo: 0%"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#3F51B5"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSubirNube"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="SUBIR FOTO A FIREBASE STORAGE"
+        app:cornerRadius="8dp"
+        app:backgroundTint="#4CAF50"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
+
 </LinearLayout>
