@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -180,13 +181,11 @@ public class EvidenciaActivity extends AppCompatActivity {
 
         tareaSubida.addOnSuccessListener(takeSnapshot -> {
             fotoRef.getDownloadUrl().addOnSuccessListener(uriDescarga -> {
-                pbSubida.setVisibility(View.GONE);
-                tvPorcentaje.setVisibility(View.GONE);
-                btnSubirNube.setEnabled(true);
 
                 String urlFinal = uriDescarga.toString();
+                String codigoDocumento = "1001";
 
-                Toast.makeText(EvidenciaActivity.this, "Foto cargada en la nube exitosamente", Toast.LENGTH_SHORT).show();
+                guardarEnlaceEnFirestore(codigoDocumento, urlFinal);
 
                 android.util.Log.d("FIREBASE_STORAGE", "URL publica: " + urlFinal);
 
@@ -257,6 +256,27 @@ public class EvidenciaActivity extends AppCompatActivity {
                     tvPorcentaje.setVisibility(View.GONE);
                     btnSubirNube.setEnabled(true);
                     Toast.makeText(EvidenciaActivity.this, "Ocurrio un error en la subida " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void guardarEnlaceEnFirestore(String idDocumento, String urlDescarga) {
+        // Referencia al documento en la colección 'productos'
+        FirebaseFirestore.getInstance()
+                .collection("productos")
+                .document(idDocumento)
+                .update("urlFoto", urlDescarga)
+                .addOnSuccessListener(aVoid -> {
+                    // Éxito: Ocultamos loaders y volvemos a la pantalla principal
+                    pbSubida.setVisibility(View.GONE);
+                    btnSubirNube.setEnabled(true);
+                    Toast.makeText(EvidenciaActivity.this, "¡Evidencia fotográfica vinculada con éxito!", Toast.LENGTH_SHORT).show();
+
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    pbSubida.setVisibility(View.GONE);
+                    btnSubirNube.setEnabled(true);
+                    Toast.makeText(EvidenciaActivity.this, "Error al actualizar Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
