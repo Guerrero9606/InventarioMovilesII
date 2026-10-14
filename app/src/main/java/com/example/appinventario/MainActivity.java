@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,12 +15,23 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
 import android.view.WindowManager;
 import android.graphics.Color;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.core.content.ContextCompat;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +42,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +52,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String CANAL_ID = "canal_alertas_inventario";
+    private ActivityResultLauncher<String> permisoNotificacionesLauncher;
     private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios, btnAdjuntarImagen;
     private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
     private Button btnGuardarTienda;
@@ -60,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        crearCanalDeNotificaciones();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -108,6 +125,27 @@ public class MainActivity extends AppCompatActivity {
                 cargarListaProductos();
             }
         });*/
+
+        permisoNotificacionesLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (!isGranted) {
+                    Toast.makeText(this, "Alertas desactivadas por el usuario", Toast.LENGTH_SHORT).show();
+                }
+            }
+        );
+
+        verificarPermisoNotificacion();
+
+        FirebaseMessaging.getInstance().getToken()
+            .addOnCompleteListener(task -> {
+                if (!task.isSuccessful()){
+                    Log.w("FCM_DEBUG", "No se pudo obtener el token de FCM", task.getException());
+                    return;
+                }
+                String tokenDispositivo = task.getResult();
+                Log.d("FCM_TOKEN_ACTUAL", "Token para pruebas: " + tokenDispositivo);
+            });
 
         etPrecio.addTextChangedListener(new android.text.TextWatcher(){
             @Override
@@ -402,6 +440,9 @@ public class MainActivity extends AppCompatActivity {
                     btnCrearArticulo.setEnabled(true);
 
                     Toast.makeText(MainActivity.this, "Guardado en Firebase con exito", Toast.LENGTH_SHORT).show();
+                    lanzarNotificacionLocal("¡Nuevo Producto Registrado!",
+                            "El producto '" + descripcion + "' con código " + codigo + " ya esta sincronizado en la nube.");
+
                     etCodigo.setText("");
                     etDescripcion.setText("");
                     etPrecio.setText("");
@@ -656,5 +697,64 @@ public class MainActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(android.graphics.Color.parseColor("#7F0000"));
         }
+    }
+
+    private void crearCanalDeNotificaciones(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence nombreCanal = "Alertas de Inventario";
+            String descripcion = "Notificaciones sobre altas, bajas y cambios en los Productos";
+            int importancia = NotificationManager.IMPORTANCE_HIGH;
+
+            NotificationChannel canal = new NotificationChannel(CANAL_ID, nombreCanal, importancia);
+            canal.setDescription(descripcion);
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+
+            if (manager != null){
+                manager.createNotificationChannel(canal);
+            }
+        }
+    }
+
+    private void verificarPermisoNotificacion(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                permisoNotificacionesLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
+    private void lanzarNotificacionLocal(String titulo, String mensaje){
+        Intent destinoIntent = new Intent(this, MainActivity.class);
+        destinoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                destinoIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CANAL_ID)
+                .setSmallIcon(R.drawable.ic_caja)
+                .setContentTitle(titulo)
+                .setContentText(mensaje)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(mensaje))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED){
+                int idNotificacion = (int) System.currentTimeMillis();
+                managerCompat.notify(idNotificacion, builder.build());
+            }
+        } else {
+            int idNotificacion = (int) System.currentTimeMillis();
+            managerCompat.notify(idNotificacion, builder.build());
+        }
+
     }
 }
