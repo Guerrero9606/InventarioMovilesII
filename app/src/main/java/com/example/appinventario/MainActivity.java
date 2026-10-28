@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String CANAL_ID = "canal_alertas_inventario";
     private ActivityResultLauncher<String> permisoNotificacionesLauncher;
-    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios, btnAdjuntarImagen;
+    private com.google.android.material.button.MaterialButton btnCrearArticulo, btnBuscar, btnEditar, btnBorrar, btnBuscarTodos, btnFiltrar, btnCerrarSesion, btnAutocompletarAPI, btnAdminUsuarios, btnAdjuntarImagen, btnAbrirMapa;
     private EditText etCodigo, etDescripcion, etPrecio, etNombreTienda;
     private Button btnGuardarTienda;
     private com.google.android.material.textfield.TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         btnAutocompletarAPI = findViewById(R.id.btnAutocompletarAPI);
         btnAdminUsuarios = findViewById(R.id.btnAdminUsuarios);
         btnAdjuntarImagen = findViewById(R.id.btnAdjuntarImagen);
+        btnAbrirMapa = findViewById(R.id.btnAbrirMapa);
 
         tilCodigo = findViewById(R.id.tilCodigo);
         tilDescripcion = findViewById(R.id.tilDescripcion);
@@ -164,6 +165,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(android.text.Editable sequence) {}
+        });
+
+        btnAbrirMapa.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MapaActivity.class);
+            startActivity(intent);
         });
 
         btnAdjuntarImagen.setOnClickListener(v -> {
